@@ -23,7 +23,6 @@ setwd(fp)
 data <- list.files(fp)
 gages <- read.csv("COMID_Monthly_Natural_Predict_173.csv") 
 # => dataset must contain no naturalized or modeled data and period of record (POR) should be > 15yrs and within 1950-2015
-View(gages)
 
 
 #1) Convert calendar years/months to water years/months:
@@ -33,6 +32,8 @@ View(gages)
 str(gages)
 names(gages)
 monthlymean <- select(gages, COMID, Year, Month, Estimated.Q)
+monthlymeanNA <- select(gages, COMID, Year, Month, Estimated.Q)
+
 View(monthlymean)
 
 #b) 'rename' current year/month columns to "calendar" year/month
@@ -61,6 +62,11 @@ View(monthlymean)
 
 #2) Calculate quartiles for each COMID => quartiles are based on the entire period of record for one COMID(gage) => Each gage will have unique quartiles but the same quartiles will be used for each year within a gage's POR to determine the WYT.
 
+#a) Omit all 0 Estimated.Q values
+monthlymean[monthlymean==0] <- NA
+monthlymean <- na.omit(monthlymean)
+
+#b) calculate quartiles 
             # group all the monthly avg flows (Estimated.Q) for each COMID
 quartiles <- group_by(monthlymean, COMID) %>%
             # make quartiles for each COMID for entire POR => Q1=25%, Q2=50%, Q3=75%
@@ -116,6 +122,6 @@ View(WYT_USGS_all)
 WYT_final <- select(WYT_USGS_all, USGS_GAGE, COMID, STATION_NA, Water_Year, Q1, Q2, Q3, Mean_Annual_Flow, WYT, POR_avg_annual_flow, Count_water_months, Count_monthlyavg)
 View(WYT_final)
 #b) export dataframe as csv
-write.csv(WYT_final, "X:/environmental_flows/WaterYearType/Results/Modeled.Predicted.Unimpaired.15+.WYT_09.21.2018.csv")
+write.csv(WYT_final, "X:/environmental_flows/WaterYearType/Results/Modeled.Predicted.Unimpaired.15+.WYT_09.26.2018.csv")
 
 
